@@ -49,6 +49,9 @@ _WASHER_DRY_SETTING_LABELS = {
     8: "timed_dry_level_5",
     9: "timed_dry_level_6",
 }
+# The named-states format reports the actual wash temperature in degrees
+# Celsius instead of the numbered index used by the legacy array format.
+_WASHER_STATES_TEMPERATURE_VALUES = (20, 30, 40, 60, 95)
 
 
 class HiSenseLogin:
@@ -1010,7 +1013,13 @@ class HiSenseWasher(_HiSenseDevice):
             "temperature_raw": temperature,
             "configured_spin": _as_int(states.get("dehydrationSpeed")),
             "configured_temperature": (
-                _WASHER_TEMPERATURE_LABELS.get(temperature, f"unknown_{temperature}")
+                (
+                    "ambient"
+                    if temperature == 0
+                    else f"temperature_{temperature}_c"
+                    if temperature in _WASHER_STATES_TEMPERATURE_VALUES
+                    else f"unknown_{temperature}"
+                )
                 if temperature is not None
                 else None
             ),
